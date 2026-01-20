@@ -5,7 +5,7 @@ import cors from "cors"; // 1. Importado corretamente
 const app = express();
 
 // 2. ATIVAR O CORS (Isso resolve o erro que você postou)
-app.use(cors()); 
+app.use(cors());
 
 // Configurações de limite
 app.use(express.json({ limit: '50mb' }));
@@ -14,14 +14,24 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // --- ROTAS ---
 
 // Rota para BUSCAR todos os usuários
-app.get('/usuarios', async (req, res) => {
+// 🔹 Buscar usuário por ID
+app.get('/usuarios/:id', async (req, res) => {
     try {
-        const users = await prisma.user.findMany();
-        res.status(200).json(users);
+        const user = await prisma.user.findUnique({
+            where: { id: req.params.id }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "Usuário não encontrado" });
+        }
+
+        res.status(200).json(user);
     } catch (error) {
-        res.status(500).json({ error: "Erro ao buscar usuários" });
+        console.error("Erro ao buscar usuário:", error);
+        res.status(500).json({ error: "Erro interno no servidor" });
     }
 });
+
 
 // Rota para CRIAR novos usuários
 app.post('/usuarios', async (req, res) => {
