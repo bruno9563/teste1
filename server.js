@@ -91,9 +91,9 @@ app.patch('/usuarios/:id/declaracao', async (req, res) => {
 });
 
 // --- INICIALIZAÇÃO DO SERVIDOR ---
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // O Render vai escolher a porta certa agora
 const server = app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+    console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
 
 // Configuração de timeout movida para fora das rotas
