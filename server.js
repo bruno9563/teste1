@@ -98,3 +98,5 @@ const server = app.listen(PORT, () => {
 
 // Configuração de timeout movida para fora das rotas
 server.timeout = 300000;
+
+//versao 2.
