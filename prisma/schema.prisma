@@ -16,5 +16,5 @@ model User {
   // Campos para a surpresa
   mensagem   String?
   dataInicio String?
-  fotoUrl    String[]
+  
 }
