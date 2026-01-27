@@ -89,24 +89,60 @@ app.delete('/usuarios/:id', async (req, res) => {
     }
 });
 
-// Rota para salvar a declaração (PATCH)
-app.patch('/usuarios/:id/declaracao', async (req, res) => {
+// Rota para salvar a declaração (agora cria um PRESENTE)
+app.post('/gifts', async (req, res) => {
     try {
-        const { id } = req.params;
-        const { mensagem, dataInicio } = req.body;
+        const { userId, mensagem, dataInicio } = req.body;
 
-        const updatedUser = await prisma.user.update({
-            where: { id: id },
+        if (!userId || !mensagem || !dataInicio) {
+            return res.status(400).json({ error: "Todos os campos são obrigatórios" });
+        }
+
+        const newGift = await prisma.gift.create({
             data: {
+                userId: userId,
                 mensagem: mensagem,
                 dataInicio: dataInicio
             }
         });
 
-        res.status(200).json(updatedUser);
+        res.status(201).json(newGift);
     } catch (error) {
-        console.error("❌ Erro ao salvar declaração:", error);
-        res.status(500).json({ error: "Erro ao salvar os dados da declaração" });
+        console.error("❌ Erro ao criar presente:", error);
+        res.status(500).json({ error: "Erro ao criar o presente" });
+    }
+});
+
+// Rota para buscar um presente específico pelo ID
+app.get('/gifts/:id', async (req, res) => {
+    try {
+        const gift = await prisma.gift.findUnique({
+            where: { id: req.params.id },
+            include: { user: true } // Inclui dados do usuário se necessário
+        });
+
+        if (!gift) {
+            return res.status(404).json({ error: "Presente não encontrado" });
+        }
+
+        res.status(200).json(gift);
+    } catch (error) {
+        console.error("Erro ao buscar presente:", error);
+        res.status(500).json({ error: "Erro interno no servidor" });
+    }
+});
+
+// Rota para buscar todos os presentes de um usuário
+app.get('/users/:userId/gifts', async (req, res) => {
+    try {
+        const gifts = await prisma.gift.findMany({
+            where: { userId: req.params.userId }
+        });
+
+        res.status(200).json(gifts);
+    } catch (error) {
+        console.error("Erro ao buscar presentes do usuário:", error);
+        res.status(500).json({ error: "Erro interno no servidor" });
     }
 });
 
