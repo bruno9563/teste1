@@ -89,10 +89,26 @@ app.delete('/usuarios/:id', async (req, res) => {
     }
 });
 
+// Rota para listar TODOS os presentes (GET /gifts)
+app.get('/gifts', async (req, res) => {
+    try {
+        const gifts = await prisma.gift.findMany({
+            include: { user: true },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.status(200).json(gifts);
+    } catch (error) {
+        console.error("❌ Erro ao buscar presentes:", error);
+        res.status(500).json({ error: "Erro ao buscar presentes", details: error.message });
+    }
+});
+
 // Rota para salvar a declaração (agora cria um PRESENTE)
 app.post('/gifts', async (req, res) => {
     try {
         const { userId, mensagem, dataInicio } = req.body;
+
+        console.log("📦 Recebendo requisição para criar presente:", { userId, mensagem, dataInicio });
 
         if (!userId || !mensagem || !dataInicio) {
             return res.status(400).json({ error: "Todos os campos são obrigatórios" });
@@ -106,10 +122,12 @@ app.post('/gifts', async (req, res) => {
             }
         });
 
+        console.log("✅ Presente criado com sucesso:", newGift.id);
         res.status(201).json(newGift);
     } catch (error) {
         console.error("❌ Erro ao criar presente:", error);
-        res.status(500).json({ error: "Erro ao criar o presente" });
+        console.error("❌ Detalhes do erro:", error.message);
+        res.status(500).json({ error: "Erro ao criar o presente", details: error.message });
     }
 });
 
